@@ -1,6 +1,7 @@
 
 <html>
   <head>
+      <title>Charts Example</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
  <script type="text/javascript">
@@ -19,7 +20,7 @@
         data.addRows([
           ['Mushrooms', 3],
           ['Onions', 1],
-          ['Olives', 1],
+          ['Olives', 14],
           ['Zucchini', 1],
           ['Pepperoni', 2]
         ]);
@@ -27,12 +28,46 @@
         // Instantiate and draw our chart, passing in some options.
         var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
         chart.draw(data);
+        // Create a view that shows everyone hired since 2007.
+        var view = new google.visualization.DataView(data);
+        var table = new google.visualization.Table(document.getElementById('tableChart'));
+        table.draw(view, {sortColumn: 1});
       }
       function drawSheetChart(url) {
         var query = new google.visualization.Query(url);
         query.send(handleQueryResponse);
       }
 
+      function buildDataTableFromGrid(table) {
+          var data = new google.visualization.DataTable();
+          var columns = 0;
+          table.find('th').each(function (_, item) {
+              data.addColumn('string', item.innerText);
+              columns++;
+          });
+         
+          var rows = [];
+          var row = [];
+          table.find('tbody tr td').each(function (i, item) {
+ 
+              row.push(item.innerText);
+              if ((i + 1) % columns == 0) {
+                  if (row != null && row.length > 0) {
+                      rows.push(row);
+                      console.log(rows);
+                  }
+                  row = [];
+              }
+          })
+          data.addRows(rows);
+          return data;
+      }
+
+      function updateChart(data) {
+          // Instantiate and draw our chart, passing in some options.
+          var chart = new google.visualization.PieChart(document.getElementById('tableChart'));
+          chart.draw(data);
+      }
 function handleQueryResponse(response) {
   var data = response.getDataTable();
   var chart = new google.visualization.ColumnChart(document.getElementById('googlesheet-div'));
@@ -60,6 +95,8 @@ $(document).ready(function(){
       </form>
     <div id="googlesheet-div">
     </div>
+        <div id="dataGrid">
+        </div>
   </div>
   </body>
 </html>
